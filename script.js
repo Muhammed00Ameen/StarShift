@@ -98,7 +98,9 @@ function resizeCanvas() {
 
 function initStarfield() {
     stars = [];
-    for(let i = 0; i < 200; i++) {
+    // Scale star count with viewport area so the full-page sky stays dense
+    const count = Math.max(200, Math.floor((CANVAS.width * CANVAS.height) / 4500));
+    for(let i = 0; i < count; i++) {
         stars.push({
             x: Math.random() * CANVAS.width,
             y: Math.random() * CANVAS.height,
@@ -133,6 +135,8 @@ window.addEventListener('wheel', (e) => {
 // ============================================
 // GAME LOGIC & RENDERING
 // ============================================
+let graceUntil = 0; // Timestamp until which winning is blocked (anti-instant-win)
+
 function update() {
     if (levelCompleted) return;
 
@@ -143,6 +147,16 @@ function update() {
     if (keys['d'] || keys['arrowright']) player.x += speed;
 
     checkWinCondition();
+}
+
+// The player must actively engage with the game before a level can be won.
+// This prevents the "instant level complete" bug: levels whose target is
+// near the default spawn state would otherwise trigger victory on frame 1,
+// and re-triggers right after clicking "Next Level" (stale key states /
+// scroll events firing while the modal overlay is still settling).
+function hasPlayerInteracted() {
+    return player.x !== 0 || player.y !== 0 ||
+           player.rotation !== 0 || player.scale !== 1;
 }
 
 function calculateAccuracy() {
@@ -167,16 +181,21 @@ function calculateAccuracy() {
 function checkWinCondition() {
     const accuracy = calculateAccuracy();
     const accuracyPct = Math.round(accuracy * 100);
-    
+
     // Update HUD
     progressFill.style.width = accuracyPct + '%';
     accuracyValue.textContent = accuracyPct + '%';
 
-    // Auto-snap win condition (80%+ accuracy)
-    if (accuracy >= 0.80) {
+    // Auto-snap win condition (80%+ accuracy) - only after the player has
+    // actually interacted with the level and the grace period has elapsed.
+    if (accuracy >= 0.80 && canWin()) {
         levelCompleted = true;
         triggerVictory(accuracyPct);
     }
+}
+
+function canWin() {
+    return hasPlayerInteracted() && Date.now() >= graceUntil;
 }
 
 function draw() {
@@ -267,14 +286,23 @@ function triggerVictory(accuracyPct) {
 playAgainBtn.addEventListener('click', () => {
     victoryModal.classList.add('hidden');
     document.body.classList.remove('victory-active');
-    
+
     currentLevelIndex = (currentLevelIndex + 1) % LEVELS.length;
     resetLevel();
+
+    // Move focus off the button so a stray Space/Enter keypress can't
+    // re-trigger it while the new level is loading.
+    playAgainBtn.blur();
 });
 
 function resetLevel() {
     player = { x: 0, y: 0, rotation: 0, scale: 1 };
     levelCompleted = false;
+    // Clear any stale key/scroll state so a leftover "w" or wheel event from
+    // the previous level (or from clicking the modal button) can't instantly
+    // satisfy the win condition of the new level.
+    keys = {};
+    graceUntil = Date.now() + 800;
     const level = LEVELS[currentLevelIndex];
     hudLevel.textContent = currentLevelIndex + 1;
     hudName.textContent = level.name.toUpperCase();
