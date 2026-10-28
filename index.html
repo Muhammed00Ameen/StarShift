@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StarShift - 8-Bit Constellation Game</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- HUD HEADER -->
+    <header class="game-header">
+        <div class="hud-container">
+            <div class="hud-section">
+                <div class="hud-label">LEVEL</div>
+                <div class="hud-value" id="hud-level">1</div>
+            </div>
+            <div class="hud-section">
+                <div class="hud-label">CONSTELLATION</div>
+                <div class="hud-value" id="hud-name">ORION</div>
+            </div>
+            <div class="hud-section">
+                <div class="hud-label">PROGRESS</div>
+                <div class="accuracy-indicator">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <div class="accuracy-value" id="accuracy-value">0%</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- GAME CANVAS -->
+    <main class="game-container">
+        <canvas id="gameCanvas"></canvas>
+    </main>
+
+    <!-- CONTROL HINTS -->
+    <div class="control-hints">
+        <div class="hint-group">
+            <div class="hint-icon">WASD</div>
+            <div class="hint-text">to move</div>
+        </div>
+        <div class="hint-group">
+            <div class="hint-icon">SCROLL</div>
+            <div class="hint-text">to rotate</div>
+        </div>
+        <div class="hint-group">
+            <div class="hint-icon">SHIFT + SCROLL</div>
+            <div class="hint-text">to zoom</div>
+        </div>
+    </div>
+
+    <!-- VICTORY MODAL -->
+    <div id="victory-modal" class="victory-modal hidden">
+        <div class="modal-content">
+            <h2 class="modal-title">🎉 CONQUESTed!</h2>
+            <p class="modal-message" id="modal-message">You've completed the constellation challenge!</p>
+            <div class="modal-stats">
+                <div class="stat-item">
+                    <div class="stat-label">Constellation</div>
+                    <div class="stat-value" id="stat-name">Orion</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Accuracy</div>
+                    <div class="stat-value" id="stat-accuracy">100%</div>
+                </div>
+            </div>
+            <button class="modal-button" id="play-again-btn">Next Level</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
